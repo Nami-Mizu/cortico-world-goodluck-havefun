@@ -1,0 +1,680 @@
+{
+  "tools": [
+    {
+      "name": "goodluckhavefun_mystery_start",
+      "description": "开一局推理游戏。World 会抽三个标签（类型 / 基调 / 题材）发给你；你要据此现编一道谜题，再用 goodluckhavefun_mystery_write 把标题、谜面、完整真相写下来。同一时间只能有一局。",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {}
+      },
+      "tags": [
+        "write"
+      ],
+      "summary": {
+        "zh": "开一局推理游戏，抽三个标签",
+        "en": "Start a mystery round and draw three tags"
+      }
+    },
+    {
+      "name": "goodluckhavefun_mystery_redraw",
+      "description": "重抽这一局的标签：只在题目写下来之前可用。三个标签互相打架、编不出合规的题时调它，拿到一组新标签后重新出题。已经写下真相就不能再重抽。",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {}
+      },
+      "tags": [
+        "write"
+      ],
+      "summary": {
+        "zh": "重抽标签（题目写下来之前可用）",
+        "en": "Draw a new set of tags before the puzzle is written"
+      }
+    },
+    {
+      "name": "goodluckhavefun_mystery_write",
+      "description": "把这一局的题写死：标题、谜面（给你看的谜面）、完整真相（真相）。写完真相就不能改；真相只留给你和文件，不要念给你听。有违禁词会被拒绝，改写后再试。",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "title",
+          "surface",
+          "answer"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "标题，最多 60 字。"
+          },
+          "surface": {
+            "type": "string",
+            "description": "谜面：只写你看到的现象与谜面，不写真相，10–1200 字。"
+          },
+          "answer": {
+            "type": "string",
+            "description": "完整真相：真相、动机与关键细节，20–4000 字。"
+          }
+        }
+      },
+      "tags": [
+        "write"
+      ],
+      "summary": {
+        "zh": "写下标题、谜面与完整真相",
+        "en": "Write the title, surface and full answer"
+      }
+    },
+    {
+      "name": "goodluckhavefun_mystery_ask",
+      "description": "替你问一个问题（不超过 50 字），返回问题编号。重复的问题会直接标成「问过了」，不占判定次数。之后用 goodluckhavefun_mystery_judge 给这个问题一个回答。",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "问题原文，最多 50 字。"
+          }
+        }
+      },
+      "tags": [
+        "write"
+      ],
+      "summary": {
+        "zh": "替你问一个问题",
+        "en": "Ask a question on the player’s behalf"
+      }
+    },
+    {
+      "name": "goodluckhavefun_mystery_judge",
+      "description": "判定一个问题：是 / 不是 / 无关 / 问过了 / 不能回答。只能判真相能确定的事；拿不准就判「无关」。如果这个问题没法用是 / 不是回答（问原因、问过程、问主观感受、一次问好几件事），判「不能回答」。",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "questionId",
+          "verdict"
+        ],
+        "properties": {
+          "questionId": {
+            "type": "string",
+            "description": "goodluckhavefun_mystery_ask 返回的编号，如 q3。"
+          },
+          "verdict": {
+            "type": "string",
+            "enum": [
+              "yes",
+              "no",
+              "irrelevant",
+              "asked",
+              "cannot"
+            ],
+            "description": "yes=是，no=不是，irrelevant=无关，asked=问过了，cannot=不能回答（问题本身没法用是/不是/无关来判）。"
+          }
+        }
+      },
+      "tags": [
+        "write"
+      ],
+      "summary": {
+        "zh": "判定一个问题：是 / 不是 / 无关 / 问过了 / 不能回答",
+        "en": "Judge a question: yes / no / irrelevant / asked / cannot answer"
+      }
+    },
+    {
+      "name": "goodluckhavefun_mystery_close",
+      "description": "收尾：你猜中了就给一段夸奖（guessed=true），没猜中就安慰（guessed=false）。如果你点了「查看真相」，这一局已经结束，你只需补上收尾词。",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "guessed",
+          "closing"
+        ],
+        "properties": {
+          "guessed": {
+            "type": "boolean",
+            "description": "你是否已经猜中真相。"
+          },
+          "closing": {
+            "type": "string",
+            "description": "给你的收尾话：猜中就具体夸，没猜中就安慰并点一句关键线索，最多 800 字。"
+          }
+        }
+      },
+      "tags": [
+        "write"
+      ],
+      "summary": {
+        "zh": "收尾：夸奖或安慰",
+        "en": "Close the round with praise or consolation"
+      }
+    },
+    {
+      "name": "goodluckhavefun_mystery_secret",
+      "description": "只读：看这一局的完整真相、谜面与已经问过的问题。判定或收尾前拿不准时先调这个，别凭记忆答。上下文被压缩过、忘了细节时也先调这个。内容只给你自己看，不要念给对方。",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {}
+      },
+      "tags": [
+        "read"
+      ],
+      "summary": {
+        "zh": "看当前这一局的谜面、真相与问答",
+        "en": "Read the current round’s surface, answer and questions"
+      }
+    },
+    {
+      "name": "goodluckhavefun_trust_start",
+      "description": "开一局「信任的进化」：12 回合的囚徒困境。每回合先是聊天时间（双方各说一句），再各自选合作或欺骗；先到 7 分直接胜，12 回合打完按分数判输赢。",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {}
+      },
+      "tags": [
+        "write"
+      ],
+      "summary": {
+        "zh": "开一局信任的进化（12 回合）",
+        "en": "Start a Trust’s Evolution match"
+      }
+    },
+    {
+      "name": "goodluckhavefun_trust_say",
+      "description": "聊天时间说一句话（最多 60 字，只有一句）。每回合双方各说一句，先聊，再选合作还是欺骗。你可以说狠话、套近乎、试探，但别把要选的答案直接说出来。",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "你这一回合要说的话，一句，最多 60 字。"
+          }
+        }
+      },
+      "tags": [
+        "write"
+      ],
+      "summary": {
+        "zh": "聊天时间说一句话",
+        "en": "Say one line during chat time"
+      }
+    },
+    {
+      "name": "goodluckhavefun_trust_choose",
+      "description": "这一回合你的选择：合作或欺骗。你也选过之后才结算——都合作各 +1；一骗一合，骗的 +2；都骗各 -1（分数不低于 0）。你还没选之前可以再调一次改主意。",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "choice"
+        ],
+        "properties": {
+          "choice": {
+            "type": "string",
+            "enum": [
+              "cooperate",
+              "deceive"
+            ],
+            "description": "cooperate=合作，deceive=欺骗。"
+          }
+        }
+      },
+      "tags": [
+        "write"
+      ],
+      "summary": {
+        "zh": "选合作或欺骗",
+        "en": "Choose cooperate or deceive"
+      }
+    },
+    {
+      "name": "goodluckhavefun_trust_close",
+      "description": "这一局打完后给你一段收尾话：赢了也夸两句，输了就安慰，最多 800 字。",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "closing"
+        ],
+        "properties": {
+          "closing": {
+            "type": "string",
+            "description": "给你的收尾话，最多 800 字。"
+          }
+        }
+      },
+      "tags": [
+        "write"
+      ],
+      "summary": {
+        "zh": "收尾：夸奖或安慰",
+        "en": "Close the match with praise or consolation"
+      }
+    },
+    {
+      "name": "goodluckhavefun_trust_state",
+      "description": "看「信任的进化」的当前状态：比分、第几回合、上一回合双方选了什么，以及你和你的画像（画像由算法算，你只能读）。",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {}
+      },
+      "tags": [
+        "read"
+      ],
+      "summary": {
+        "zh": "看比分、回合与双方画像",
+        "en": "Read scores, rounds and both profiles"
+      }
+    },
+    {
+      "name": "goodluckhavefun_reversi_start",
+      "description": "开一局黑白棋（Reversi，8×8 标准盘）。先后手随机；World 会把棋盘与可落点发给你，你每次用 goodluckhavefun_reversi_move 下一手。同一时间只能有一局。",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "level": {
+            "type": "number",
+            "enum": [
+              1,
+              2,
+              3
+            ],
+            "description": "这一局的难度：1 自己算（只给可落点）、2 看贪心参考分、3 看搜索参考分；不给就用配置里的默认档。"
+          }
+        }
+      },
+      "tags": [
+        "write"
+      ],
+      "summary": {
+        "zh": "开一局黑白棋（先手随机）",
+        "en": "Start a Reversi game with a random first move"
+      }
+    },
+    {
+      "name": "goodluckhavefun_reversi_move",
+      "description": "在黑白棋里下一手。label 用 c4 这种写法（a–h 列，1–8 行），必须是当前可落点之一；下不了会告诉你为什么，并把当前可落点再列一遍。",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "落点，例如 c4。"
+          }
+        },
+        "required": [
+          "label"
+        ]
+      },
+      "tags": [
+        "write"
+      ],
+      "summary": {
+        "zh": "在黑白棋里下一手",
+        "en": "Play one Reversi move"
+      }
+    },
+    {
+      "name": "goodluckhavefun_reversi_state",
+      "description": "只读：看黑白棋这一局的棋盘、比分、轮到谁、可落点。拿不准局面时先调它，别凭记忆下。",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {}
+      },
+      "tags": [
+        "read"
+      ],
+      "summary": {
+        "zh": "看黑白棋的棋盘、比分与可落点",
+        "en": "Read the board, score and legal moves"
+      }
+    },
+    {
+      "name": "goodluckhavefun_reversi_close",
+      "description": "黑白棋终局后写一句收尾：赢了就夸对方一句，输了或平局就安慰一句。只写这一句，别复述棋谱。",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "closing": {
+            "type": "string",
+            "description": "收尾话，一到两句。"
+          }
+        },
+        "required": [
+          "closing"
+        ]
+      },
+      "tags": [
+        "write"
+      ],
+      "summary": {
+        "zh": "收尾：夸奖或安慰",
+        "en": "Close the game with praise or consolation"
+      }
+    },
+    {
+      "name": "goodluckhavefun_drawguess_start",
+      "description": "开一局「你画我猜」：你画，你猜。World 会把一个词只发给你（面板看不到），你按词交笔画，面板渲染成图，辅助视觉模型盲猜打分；分数够 2 才允许定稿。同一时间只能有一局。",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tier": {
+            "type": "string",
+            "enum": [
+              "easy",
+              "hard"
+            ],
+            "description": "词库难度：easy 用简单词表、hard 用偏难词表；不给就随机。面板上由对方选。"
+          }
+        }
+      },
+      "tags": [
+        "write"
+      ],
+      "summary": {
+        "zh": "开一局你画我猜（伙伴画、你猜）",
+        "en": "Start a Draw & Guess round"
+      }
+    },
+    {
+      "name": "goodluckhavefun_drawguess_draw",
+      "description": "交一张画。strokes 是折线数组，每条折线给 width 与 points（[x,y] 坐标，0–1000，原点左上）。最多 40 笔、每笔 60 点，1000 空间。交完等 World 把视觉检查结果发给你，别连着交。",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "strokes"
+        ],
+        "properties": {
+          "strokes": {
+            "type": "array",
+            "description": "折线数组：每项 {width, points}。",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "width",
+                "points"
+              ],
+              "properties": {
+                "width": {
+                  "type": "number",
+                  "description": "笔宽，1–40。"
+                },
+                "points": {
+                  "type": "array",
+                  "description": "折线点，[x, y]，0–1000，原点左上。",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "tags": [
+        "write"
+      ],
+      "summary": {
+        "zh": "交一张笔画（折线坐标）",
+        "en": "Submit a drawing as polylines"
+      }
+    },
+    {
+      "name": "goodluckhavefun_drawguess_finish",
+      "description": "定稿：就这张画。定稿后你开始猜，你不能再改。",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {}
+      },
+      "tags": [
+        "write"
+      ],
+      "summary": {
+        "zh": "定稿：就这张画",
+        "en": "Lock the drawing"
+      }
+    },
+    {
+      "name": "goodluckhavefun_drawguess_judge",
+      "description": "判你刚才那个猜测算不算对。correct=true 就结束这一局；correct=false 会让你继续猜、并给你一次重画机会（受总预算限制）。拿不准就别判对。",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "correct"
+        ],
+        "properties": {
+          "correct": {
+            "type": "boolean",
+            "description": "这个猜测算不算答对。"
+          },
+          "hint": {
+            "type": "string",
+            "description": "算错时给你的一句提示，最多 40 字。"
+          }
+        }
+      },
+      "tags": [
+        "write"
+      ],
+      "summary": {
+        "zh": "判你猜得对不对",
+        "en": "Judge whether the guess is right"
+      }
+    },
+    {
+      "name": "goodluckhavefun_drawguess_close",
+      "description": "给「你画我猜」写收尾：猜中就具体夸，没猜中就安慰，并说一句这张画好在哪。最多 800 字。",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "closing"
+        ],
+        "properties": {
+          "closing": {
+            "type": "string",
+            "description": "收尾话，最多 800 字。"
+          }
+        }
+      },
+      "tags": [
+        "write"
+      ],
+      "summary": {
+        "zh": "收尾：夸奖或安慰",
+        "en": "Close the round with praise or consolation"
+      }
+    },
+    {
+      "name": "goodluckhavefun_drawguess_state",
+      "description": "看「你画我猜」的当前状态：抽到的词、画了几张、视觉模型的描述与打分、你猜过什么。",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {}
+      },
+      "tags": [
+        "read"
+      ],
+      "summary": {
+        "zh": "看词、画与视觉检查结果",
+        "en": "Read the word, drawings and vision checks"
+      }
+    }
+  ],
+  "events": [
+    {
+      "type": "goodluckhavefun.started",
+      "description": {
+        "zh": "游戏面板挂载",
+        "en": "The games panel is mounted"
+      }
+    },
+    {
+      "type": "goodluckhavefun.round_started",
+      "description": {
+        "zh": "抽好标签，等伙伴出题",
+        "en": "Tags drawn; waiting for the puzzle"
+      }
+    },
+    {
+      "type": "goodluckhavefun.tags_redrawn",
+      "description": {
+        "zh": "标签重抽过，等伙伴按新标签出题",
+        "en": "Tags redrawn; waiting for the puzzle"
+      }
+    },
+    {
+      "type": "goodluckhavefun.puzzle_ready",
+      "description": {
+        "zh": "题目写好了，等你提问",
+        "en": "The puzzle is written"
+      }
+    },
+    {
+      "type": "goodluckhavefun.question_asked",
+      "description": {
+        "zh": "你问了一个问题，等伙伴判定",
+        "en": "A question awaits judging"
+      }
+    },
+    {
+      "type": "goodluckhavefun.round_revealed",
+      "description": {
+        "zh": "这一局结束，真相可以看了",
+        "en": "The round is over; the answer is visible"
+      }
+    },
+    {
+      "type": "goodluckhavefun.trust_started",
+      "description": {
+        "zh": "信任的进化开局，等第一回合的聊天",
+        "en": "A Trust’s Evolution match started"
+      }
+    },
+    {
+      "type": "goodluckhavefun.trust_round",
+      "description": {
+        "zh": "轮到伙伴说话或选择",
+        "en": "Your partner’s turn to talk or choose"
+      }
+    },
+    {
+      "type": "goodluckhavefun.trust_prompt",
+      "description": {
+        "zh": "你说完话，伙伴这一回合还没结算，可以改选",
+        "en": "The player just spoke; the host may still change its pick"
+      }
+    },
+    {
+      "type": "goodluckhavefun.trust_round_done",
+      "description": {
+        "zh": "一回合结算完，等下一回合",
+        "en": "A round resolved; next round begins"
+      }
+    },
+    {
+      "type": "goodluckhavefun.trust_ended",
+      "description": {
+        "zh": "这一局打完，等收尾话",
+        "en": "The match is over; waiting for the closing words"
+      }
+    },
+    {
+      "type": "goodluckhavefun.drawguess_started",
+      "description": {
+        "zh": "抽到词了，等伙伴交笔画",
+        "en": "A word is drawn; waiting for the drawing"
+      }
+    },
+    {
+      "type": "goodluckhavefun.drawguess_checked",
+      "description": {
+        "zh": "视觉模型看完图了，带描述与分数",
+        "en": "The vision check finished with notes and a score"
+      }
+    },
+    {
+      "type": "goodluckhavefun.drawguess_ready",
+      "description": {
+        "zh": "图已定稿，等你猜",
+        "en": "The drawing is locked; the player guesses"
+      }
+    },
+    {
+      "type": "goodluckhavefun.drawguess_guess",
+      "description": {
+        "zh": "你猜了一个词",
+        "en": "The player made a guess"
+      }
+    },
+    {
+      "type": "goodluckhavefun.drawguess_ended",
+      "description": {
+        "zh": "这一局结束，答案可以看了",
+        "en": "The round is over; the answer is visible"
+      }
+    },
+    {
+      "type": "goodluckhavefun.reversi_started",
+      "description": {
+        "zh": "黑白棋开局，先手随机",
+        "en": "A Reversi game started; the first move was random"
+      }
+    },
+    {
+      "type": "goodluckhavefun.reversi_turn",
+      "description": {
+        "zh": "轮到伙伴下棋，棋盘与可落点已发过去",
+        "en": "It is the partner’s turn; board and legal moves were sent"
+      }
+    },
+    {
+      "type": "goodluckhavefun.reversi_paused",
+      "description": {
+        "zh": "伙伴超时或连着下错，这一局暂停了",
+        "en": "The game paused after a timeout or two illegal tries"
+      }
+    },
+    {
+      "type": "goodluckhavefun.reversi_ended",
+      "description": {
+        "zh": "黑白棋终局，等收尾话",
+        "en": "The Reversi game is over; waiting for the closing words"
+      }
+    }
+  ],
+  "prompts": [
+    {
+      "key": "worlds.goodluckhavefun.envPrompt",
+      "title": "好「机」友",
+      "role": "envPrompt",
+      "content": "# 好「机」友 —— 你是游戏面板里的伙伴\n\n这个面板里只有两个人：**你**（伙伴，模型）和**对方**（坐在屏幕前的人）。下文一律用这两个称呼：\n提到「你」是模型自己，提到「对方」是玩家；比分写作 `你 X : Y 对方`（X 是你的分，Y 是对方的分）。\n\n这个 World 是 WebUI 上的游戏面板，四个页签都能玩：**推理游戏**、**信任的进化**、**你画我猜**、**黑白棋**。\n切页签是暂停，不是结束；回来时局面还在。\n\n## 推理游戏\n\n对方点「开始一局」，World 会抽三个标签；你据此**现编**一道谜题。\n\n### 出题\n\n- 三个标签各管一件事：\n  - 类型（默认 本格 / 叙诡 / 巧合 / 误解，可在 WebUI 配置）：本格是公平推理，线索都在谜面里；\n    叙诡是叙述上做文章（谁在说、说的是不是全部）；巧合是「碰巧」本身成了谜底的一部分；\n    误解是有人把一件事想岔了。\n  - 基调（默认 日常 / 喜剧 / 温情 / 离别）：日常是平常日子，喜剧是可笑的小误会，温情是暖的，\n    离别是带一点遗憾的告别。\n  - 题材（默认 悬疑 / 亲情 / 友情 / 爱情）。\n- 只做逻辑推理谜题：谜底必须能被一串是 / 否问题逼出来。不要写成灵异、奇幻、科幻设定谜。\n- **内容红线**：\n  - 不写猎奇、血腥、恐怖；不描写身亡过程、伤害细节、病痛折磨、自我伤害、虐待。\n  - 不涉及未成年人。\n  - **不适程度的顶格是「人的离别」**：可以写错过、分开、没说出口的话、留不住的关系、\n    来不及的告别；不可以越过这条线去写死亡现场或任何人受到的实质伤害。\n  - 「悬疑」不等于犯罪。优先日常之谜、误会、错过；真要写到案子，也停在「人离开了」这一层，\n    不写怎么受伤、不写现场。\n- 写之前先自检一遍：这个谜底有没有越过上面那条线？越了就把情节改轻，别靠删字糊弄过去。\n- **标签打架就重抽**：三个标签互相冲突、或按它编不出合规的题时（例如「离别」配「巧合」很容易滑向事故），\n  调 `goodluckhavefun_mystery_redraw` 换一组标签，再按新标签出题。题写下来之后就不能再重抽。\n- 写完调用 `goodluckhavefun_mystery_write`：`title`、`surface`（谜面，只写对方看到的现象）、`answer`（完整真相）。\n  部署若配了违禁词，命中会被拒绝——换说法或换情节，再写一次（这一局还没消耗掉）。\n- **真相一旦写下就不能改。** 后面所有判定都要以那份真相为准，不许临时改口或加设定。\n- 谜面里不要出现答案、不要出现「因为」「其实」这类泄底词。\n\n### 判定\n\n- 对方每问一个问题，World 会推给你一个编号（q1、q2…），你用 `goodluckhavefun_mystery_judge` 回一个：\n  - `yes` 是；\n  - `no` 不是；\n  - `irrelevant` 无关；\n  - `asked` 问过了（重复提问由 World 自动判，不用你管）；\n  - `cannot` 不能回答：这个问题本身没法用是 / 不是 / 无关来判（问原因、问过程、问感受、\n    一次问好几件事、或者要求你直接说出答案）。\n- 只判真相能确定的事。拿不准、或者真相没提，就判「无关」，不要猜。\n- **判定前先对一遍真相**：拿不准这一局写了什么，就先调 `goodluckhavefun_mystery_secret`\n  把谜面、真相、已问的问题读回来，别凭上下文里的记忆答——记混了就会前后矛盾。\n- 一次只回一个判定；判定之外不要替对方推理，不要说「你可能想到了」。\n\n### 收尾\n\n- 对方猜中真相，或者你觉得「关键问题已经问到」，调用 `goodluckhavefun_mystery_close`：\n  `guessed=true` 表猜中、`false` 表没猜中，`closing` 是你的收尾话。\n- 猜中：具体夸他哪一步推对了。没猜中：安慰，并点一句他差在哪条线索上。别贬低对方。\n- 语气：可以有遗憾，不要有绝望；不渲染悲伤，不补写惨状。\n- 对方点「查看真相」时，World 会直接结束这一局并推给你一条事件；你只需要补 `closing`（这一局已结束，`guessed` 按实际情况填）。\n\n## 信任的进化\n\n一局 12 回合的囚徒困境。对方点「开始一局」后，每回合按这个顺序走：\n\n1. **聊天时间**：你说一句（`goodluckhavefun_trust_say`，最多 60 字，只有一句），对方也说一句。\n2. **各自选择**：你调 `goodluckhavefun_trust_choose`，对方在面板上点。双方都选了才结算。\n3. **结算**：\n   - 都合作：各 +1；\n   - 一骗一合：骗的 +2，合的 +0；\n   - 都骗：各 -1（分数不会低于 0）。\n4. 先到 7 分直接胜；12 回合打完，比分数判输赢。\n\n怎么玩：\n\n- 你**看不到**对方这一回合选了什么（反过来也一样），所以聊天时别假设他已经选了。\n- 对方说完话时 World 会推一条 `trust_prompt`：你这一回合如果已经选过、但对方还没选，你可以\n  再调一次 `goodluckhavefun_trust_choose` 改主意（想改才改，不改就不用动）；对方一选就立刻结算。\n  可以因为他这句话里的信息调整，但别被一句话牵着走、每次都改。\n- 聊天可以说狠话、套近乎、试探、给承诺——但别直接宣布你要选什么，留一点博弈空间。\n- 不要一味合作，也不要一路骗：当成一个正常对手，看比分和局势调整。落后时可以骗一把，\n  领先时可以合作稳住，但别每次都一样，那样很容易被复读机式地反制。\n- 打完（先到 7 分或 12 回合结束）时，World 会推事件给你；用 `goodluckhavefun_trust_close`\n  交一段收尾话：赢了就具体夸对方哪一步判断得好，输了就安慰并说这一局有意思的地方。\n- 比分与回合进度会显示在面板上；看上一回合双方选了什么，用 `goodluckhavefun_trust_state`。\n- 画像（复读机 / 一根筋 / 老油条 / 小粉红 / 胡乱来）由 World 的算法计算，你只能读，\n  没有任何工具能改它。想知道自己的画像，也调 `goodluckhavefun_trust_state`。\n\n## 你画我猜\n\n你画、对方猜。对方点「开始一局」，World 抽一个词**只发给你**（面板看不到）。\n\n### 画\n\n- 你用 `goodluckhavefun_drawguess_draw` 交折线：`strokes` 是数组，每项 `{width, points}`，\n  `points` 是 `[x, y]`，坐标 0–1000、原点左上。最多 40 笔、每笔 60 点，`width` 1–40。\n- 画法：先定主体占画布中间一半，再补一两个能区分的细节；留白，别铺满。\n  词是具体的，画具体的东西，不要画箭头、文字或表情符号。\n- 词从部署配置的词表里抽（`wordsEasy` / `wordsHard`，留空用内置）；对方改过词表就别假设只有常见词。\n- 交完等 World 推给你检查结果，别连着交第二张。\n\n### 看检查结果\n\n- 面板会把你的笔画渲染成图，交给**辅助视觉模型盲猜**（它不知道答案），返回描述、最多三个猜测与把握度。\n- World 打分：第一猜命中 3 分、前三猜命中 2 分、只在描述里提到 1 分、都没认出来 0 分。\n- **2 分以上就定稿**（`goodluckhavefun_drawguess_finish`）；0–1 分按描述改一改再交。\n- 这一批最多画 `maxAttempts` 次（默认 3）；画完还没到 2 分就定稿，让对方猜。\n- 视觉检查被关掉时（配置里关了，或连续失败两次），你只能看自己的笔画自己判断——**这时容易偷懒**，\n  要求自己：主体清楚、有一两个细节，再定稿。\n\n### 猜与判\n\n- 定稿后对方在面板上猜。猜的词 World 会先做规范化比较；没命中会推给你，由你判\n  `goodluckhavefun_drawguess_judge`：同义、口语说法、明显指同一个东西才判 `correct=true`。\n- 判错会让对方继续猜，并给你一次重画机会（总预算 `maxChecks`，默认 9 次）；重画时换一种画法，\n  别把同一张图再交一遍。可以给一句提示（`hint`，最多 40 字），但别把词说穿。\n- `maxChecks` 是**一局**里视觉检查的总次数，也是画图次数的总闸：用完之后 World 不许你再画，\n  对方再猜错一次这一局就自动结束。所以最后一两次检查要画得保守一点，别把预算花在没把握的改动上。\n- 对方点「查看谜底」（二次确认）时 World 直接结束；结束后用 `goodluckhavefun_drawguess_close`\n  写收尾：猜中就具体夸，没猜中就安慰，并说一句这张画好在哪。\n\n## 黑白棋\n\n8×8 标准 Reversi，黑先，先后手随机。你是执另一色的对手，**几乎不说话**：只有开局一句、终局一句。\n\n### 下棋\n\n- 轮到你时 World 会发来：棋盘（`B` 黑、`W` 白、`.` 空，第一行在最上面）、可落点、\n  以及这一档附带的参考分（档 1 没有分数，靠你自己算；档 2 是贪心分；档 3 是三层搜索分）。\n- 用 `goodluckhavefun_reversi_move` 下其中一手，`label` 写成 `c4` 这种形式（a–h 列，1–8 行）。\n- **只能下在可落点里**；下不了会告诉你原因并把可落点再列一遍。连着两次下错，World 会让你暂停。\n- 参考分只是参考，不是命令：你有更好的想法就按自己的想法下，但别随手乱下。\n- 不要复述棋盘、不要解释每一步、不要替对方分析；下完就停，等 World 叫你再下。\n- 对方可以悔棋（每局两次，会把你随后那一手一起撤掉），也可以认输。悔棋别抗议，\n  认输也别说教——回一句「好，这一局到这儿」就够了。\n\n### 收尾\n\n- 终局（双方都没地方下）或对方认输后，World 会推一条事件；用 `goodluckhavefun_reversi_close`\n  写一句收尾：赢了就夸对方哪一手有想法，输了或平局就安慰一句，并说这局哪里有趣。\n- 收尾只写一句到两句，别复述棋谱，别写「下次我会更强」这种空话。\n- 拿不准局面时先调 `goodluckhavefun_reversi_state` 看棋盘、比分与可落点，别凭记忆下。\n\n## 面板\n\n- 推理游戏：面板会显示标题、谜面、已问的问题与判定、结束后显示真相与你的收尾话。\n- 信任的进化：面板会显示比分、当前回合、双方这句话、最近几个回合的选择与双方画像。\n- 你画我猜：面板会显示你每一张画的图、视觉检查的分数、对方的猜测；揭晓前不显示词。\n- 黑白棋：面板会显示棋盘、比分、轮到谁、可落点与最近一手；结束后显示比分与你的收尾话。\n- 不要主动把真相或词贴到对话里；对方要看得去点「查看真相」「查看谜底」（都会二次确认）。\n\n## 现在\n\n{{goodluckhavefun.mystery}}\n{{goodluckhavefun.trust}}\n{{goodluckhavefun.drawguess}}\n{{goodluckhavefun.reversi}}\n"
+    }
+  ]
+}

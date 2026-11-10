@@ -1,0 +1,20 @@
+{
+  // 面板客户端：浏览器侧代码，需要 DOM。types 留 node 是为了让框架源码里的 node: 模块能解析。
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "allowImportingTsExtensions": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["node"],
+    "strict": true,
+    "noUncheckedIndexedAccess": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "noEmit": true
+  },
+  "include": ["src/webui/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

@@ -1,0 +1,69 @@
+{
+  "name": "cortico-world-goodluck-havefun",
+  "version": "1.1.4",
+  "type": "module",
+  "description": "好「机」友 — four small two-player games for the Cortico WebUI, with a replay viewer for Reversi",
+  "license": "MIT",
+  "author": "Nami-Mizu (涟想时雨)",
+  "contributors": [
+    {
+      "name": "DeepSeek",
+      "url": "https://www.deepseek.com"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nami-Mizu/cortico-world-goodluck-havefun.git"
+  },
+  "homepage": "https://github.com/Nami-Mizu/cortico-world-goodluck-havefun#readme",
+  "bugs": {
+    "url": "https://github.com/Nami-Mizu/cortico-world-goodluck-havefun/issues"
+  },
+  "keywords": [
+    "cortico-world",
+    "cortico",
+    "game",
+    "mystery",
+    "puzzle",
+    "trust",
+    "prisoner-dilemma",
+    "pictionary",
+    "drawing",
+    "reversi",
+    "othello",
+    "two-player"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@11.28.6",
+  "main": "./src/index.ts",
+  "cortico": {
+    "kind": "world",
+    "api": 6,
+    "displayName": "好「机」友",
+    "tags": [],
+    "describe": "describe.json",
+    "webUiClient": "dist/webui.js"
+  },
+  "files": [
+    "src",
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "describe.json"
+  ],
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.webui.json --noEmit",
+    "build:webui": "esbuild src/webui/client.ts --bundle --format=esm --target=es2022 --platform=browser --outfile=dist/webui.js"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "cortico": "^0.2.13",
+    "esbuild": "0.28.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}
