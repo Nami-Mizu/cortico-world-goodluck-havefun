@@ -9,6 +9,7 @@ import type { GoodluckhavefunConfigSection } from '../src/config.ts';
 import { FakeHost } from './helpers/fake-host.ts';
 import { drawTags, tagDimensions, DEFAULT_TAG_VALUES } from '../src/tags.ts';
 import type { MysterySnapshot } from '../src/mystery.ts';
+import { ReversiGame } from '../src/reversi-game.ts';
 import type { ReversiPanelSnapshot, ReversiPayload } from '../src/reversi-game.ts';
 import { buildProfile } from '../src/trust.ts';
 
@@ -75,7 +76,7 @@ function makeWorld() {
   return { ctx, world: GOODLUCKHAVEFUN.create(ctx) };
 }
 
-describe('Good Luck Have Fun', () => {
+describe('闲弈', () => {
   it('干装载不报失败：装载器会接受它', async () => {
     const report = await dryMountWorld(GOODLUCKHAVEFUN, { scratchDir });
     expect(report.failures).toEqual([]);
@@ -1031,5 +1032,37 @@ describe('黑白棋', () => {
     expect(resumed.snapshot?.moves).toHaveLength(0);
     expect(resumed.snapshot?.humanColor).toBe(humanColor);
     expect(resumed.snapshot?.phase).toBe('playing');
+  });
+});
+
+describe('黑白棋的终局判定', () => {
+  it('下满全盘同色时立刻按 64:0 结算', () => {
+    const board = Array.from({ length: 8 }, () => Array.from({ length: 8 }, () => 'B' as const));
+    const game = new ReversiGame({
+      id: 'reversi-full',
+      level: 2,
+      humanColor: 'W',
+      timezone: 'Asia/Shanghai',
+      start: { board, turn: 'human' },
+    });
+    expect(game.currentPhase).toBe('ended');
+    expect(game.score()).toEqual({ human: 0, model: 64 });
+    expect(game.snapshot().winner).toBe('model');
+  });
+
+  it('某一方被清空（盘面还没下满）也立刻结算，并按 64:0 记分', () => {
+    const board = Array.from({ length: 8 }, (_, row) =>
+      Array.from({ length: 8 }, (_, col) => (row === 0 && col === 0 ? null : ('B' as const))),
+    );
+    const game = new ReversiGame({
+      id: 'reversi-wipe',
+      level: 2,
+      humanColor: 'W',
+      timezone: 'Asia/Shanghai',
+      start: { board, turn: 'human' },
+    });
+    expect(game.currentPhase).toBe('ended');
+    expect(game.score()).toEqual({ human: 0, model: 64 });
+    expect(game.snapshot().winner).toBe('model');
   });
 });

@@ -1,8 +1,8 @@
 {
   "name": "cortico-world-goodluck-havefun",
-  "version": "1.1.4",
+  "version": "1.2.0",
   "type": "module",
-  "description": "好「机」友 — four small two-player games for the Cortico WebUI, with a replay viewer for Reversi",
+  "description": "闲弈 — four small two-player games for the Cortico WebUI, with a replay viewer for Reversi",
   "license": "MIT",
   "author": "Nami-Mizu (涟想时雨)",
   "contributors": [
@@ -41,8 +41,11 @@
   "cortico": {
     "kind": "world",
     "api": 6,
-    "displayName": "好「机」友",
-    "tags": [],
+    "displayName": "闲弈",
+    "tags": [
+      "game",
+      "requires-key"
+    ],
     "describe": "describe.json",
     "webUiClient": "dist/webui.js"
   },

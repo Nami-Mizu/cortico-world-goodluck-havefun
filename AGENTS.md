@@ -21,6 +21,9 @@
   桩里的 `El` 要带 `classList`（1.1.2 补的）：面板会用 `classList.add('bad')`，缺了它 `renderBoard` 会抛异常、refresh 被 catch 吞掉，画面停在主界面却没人发现。
 - 对局历史在 `src/history.ts`：结束时 `save(entry)` 到 `<dataDir>/history/<游戏>.json`，**一页最多 5 局**（`HISTORY_PAGE_SIZE`）、每游戏留 100 局；
   同一局按 id 覆盖（收尾话后到也会更新）。**id 必须带开局时间**（`mystery:<createdAt>`、`drawguess:<createdAt>`），别用进程内局号——重启后局号会重数，撞上盘上的旧记录会被覆盖成「只剩两条」。`home`/`history` 前会先 `ensureRecorded()`。
+- 黑白棋终局记分在 `ReversiGame.finish()`：某一方 0 子时 `finalScore` 记 64:0 / 0:64（剩余空格算给幸存方），`score()` 终局后返回 `finalScore`；别改回「按盘面剩余子数」。
+- 复盘接续：`reversiReplayResume()` 在 `step >= moves.length` 时直接抛错，面板同时把「从此刻开始对局」置灰——双保险，改一边记得另一边。
+- 面板冒烟 `scratch/panel.ts` 的 `El` 桩有 `addEventListener` + `click()`；`wire()` 给「对局历史」绑的是 `addEventListener`，测试里必须 `button.click()`，只调 `onclick` 不会触发。
 - `buildScaffold()` 的 `show()` 只在视图真的变化时才 `fadeIn()`——别为了「每帧都刷新」去掉这个守卫，
   否则轮询会每 2.5 秒把整页渐入一次。`view` 初值是 `null`、并同时切 `hidden` 与 `style.display`：
   这样切页签重新 `mount()` 后的第一次 `show()` 会被当成「切换」，正好播一次渐入；
@@ -38,7 +41,7 @@
   - 推理游戏：`goodluckhavefun_mystery_{start,redraw,write,ask,judge,close,secret}`。判定有五种：是 / 不是 / 无关 / 问过了 / 不能回答（`cannot` 给「没法用是/否判」的问题，比如问原因、问过程、问感受、一次问好几件事；`ask` 的重复问题由 World 自动标「问过了」，不推事件、不占判定）。
   - 信任的进化：`goodluckhavefun_trust_{start,say,choose,close,state}`。
   - 你画我猜：`goodluckhavefun_drawguess_{start,draw,finish,judge,close,state}`。
-  - 黑白棋：`goodluckhavefun_reversi_{start,move,state,close}`。
+  - 黑白棋：`goodluckhavefun_reversi_{start,move,state,close}`。终局判定在 `ReversiGame.settleIfOver()`：每次落子后与接续局构造时都检查，盘面下满（含全盘同色 64:0）或某一方 0 子就直接 `finish()`——别改回只靠「双方都没地方下」那条推断。
 - `_redraw` 只在题目写下来之前可用（`MysteryGame.phase() === 'drawing'`），用途是标签互相打架时换一组；写下真相后调用会被拒。
 - 三个维度（类型 / 基调 / 题材）写死在 `src/tags.ts` 的 `TAG_LABELS`，每个维度的候选标签读配置 `typeTags` / `toneTags` / `themeTags`（`、` 分隔，留空回落 `DEFAULT_TAG_VALUES`）。
 - 违禁词：配置 `bannedWords`（`、` 分隔，默认空）。`MysteryGame.writePuzzle` 在长度校验之后用 `findBannedWords` 扫标题 + 谜面 + 真相，命中就抛错，这一局不落盘、可以重写。
@@ -110,3 +113,6 @@
   MINOR +1 给「新游戏 / 新工具 / 新事件 / 新配置项 / 玩家能感知的规则变化」；
   破坏性改名或改语义才升 MAJOR，并在 CHANGELOG 里点名。
 - **发布前自查**：`npm pack --dry-run` 看文件清单（应只有 src、dist、README、CHANGELOG、describe.json、package.json）；确认 `src/__check-entry.mjs`、`scratch/` 这类本地产物没被打进去。
+
+- 显示名是 `闲弈`（`cortico.displayName`、World `label`、配置组标题、提示词标题、README 标题保持一致）；包名与世界 id 仍是 `cortico-world-goodluck-havefun` / `goodluckhavefun`，不要跟着改。
+- 市场标签在 `package.json` 的 `cortico.tags`：`game`（弱博弈/回合制游戏）、`requires-key`（「你画我猜」的盲评要辅助视觉模型的 Key，可关闭）。标签只在索引扫到新版本时更新，改标签要升版本。

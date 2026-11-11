@@ -1,5 +1,5 @@
 ﻿/**
- * 好「机」友：在 WebUI 里和伙伴玩弱博弈的双人游戏。
+ * 闲弈：在 WebUI 里和伙伴玩弱博弈的双人游戏。
  *
  * 这一版接的是「推理游戏」：World 抽三个标签，模型据此现编一道谜题，把完整真相写进文件钉死；
  * 你在面板里提问，模型用四种回答判定；面板点「查看真相」（二次确认）或模型判断
@@ -605,7 +605,7 @@ export class GoodluckhavefunWorld implements World {
 
   webUi(): WorldWebUiDecl {
     return {
-      label: '好「机」友',
+      label: '闲弈',
       badges: [
         {
           label: '推理游戏',
@@ -658,7 +658,7 @@ export class GoodluckhavefunWorld implements World {
       promptDocs: [
         {
           key: 'worlds.goodluckhavefun.envPrompt',
-          title: '好「机」友',
+          title: '闲弈',
           description:
             '四个游戏的玩法：推理游戏怎么出题判定，信任的进化怎么聊、怎么选、怎么收尾，' +
             '你画我猜怎么交笔画、怎么看视觉检查、怎么判你的猜测，黑白棋怎么下、怎么收尾。',
@@ -990,6 +990,8 @@ export class GoodluckhavefunWorld implements World {
   private async reversiReplayResume(): Promise<ReversiPayload> {
     const state = this.reversiReplayState;
     if (!state) throw new Error('还没进复盘。');
+    // 已经在最后一手：这一局已经下完了，不能再从「结束」接着下。
+    if (state.step >= state.moves.length) throw new Error('已经在最后一手了，这一局下完了，不能从此刻开始。');
     const steps = state.moves.slice(0, state.step).map((move) => ({
       label: move.label,
       disc: move.side === 'human' ? state.humanColor : opponent(state.humanColor),

@@ -1,5 +1,5 @@
 ﻿/**
- * 好「机」友 的面板。
+ * 闲弈 的面板。
  *
  * 三个游戏各自是一个 World 面板 —— 在 WebUI 里就是三个与「配置」同级的页签。
  * 每个面板自己管理四块画面：主界面（标题 / 简介 / 开始 / 对局历史）、游戏页、
@@ -1611,6 +1611,7 @@ function mountReversi(ctx: WebUiPanelContext): Disposable {
     replayPrev.disabled = value.step <= 0;
     replayNextBtn.disabled = value.step >= value.total;
     replayLast.disabled = value.step >= value.total;
+    replayResumeButton.disabled = value.step >= value.total;
     statusLevel.textContent = text(`难度：${value.levelLabel}`, `Level: ${value.levelLabel}`);
     statusScore.textContent = text(
       `你 ${value.score.human} : ${value.score.model} 伙伴`,

@@ -1,4 +1,4 @@
-// src/webui/client.ts
+// _dev/packages/cortico-world-goodluck-havefun/src/webui/client.ts
 var FADE_IN = [
   { opacity: 0, transform: "translateY(10px)" },
   { opacity: 1, transform: "translateY(0)" }
@@ -1319,6 +1319,7 @@ function mountReversi(ctx) {
     replayPrev.disabled = value.step <= 0;
     replayNextBtn.disabled = value.step >= value.total;
     replayLast.disabled = value.step >= value.total;
+    replayResumeButton.disabled = value.step >= value.total;
     statusLevel.textContent = text(`\u96BE\u5EA6\uFF1A${value.levelLabel}`, `Level: ${value.levelLabel}`);
     statusScore.textContent = text(
       `\u4F60 ${value.score.human} : ${value.score.model} \u4F19\u4F34`,

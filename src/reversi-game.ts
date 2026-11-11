@@ -12,6 +12,7 @@ import {
   boardText,
   cellAt,
   discCount,
+  emptyCount,
   flipsFor,
   fromLabel,
   initialBoard,
@@ -155,6 +156,8 @@ export class ReversiGame {
   private winner: ReversiWinner | null = null;
   private closing: string | null = null;
   private endedAt: string | null = null;
+  /** 终局计分：清盘时按主流口径补成 64:0 / 0:64（未落子的空格算给幸存方）。 */
+  private finalScore: { human: number; model: number } | null = null;
   private lastMove: string | null = null;
 
   constructor(options: ReversiGameOptions) {
@@ -169,6 +172,7 @@ export class ReversiGame {
       this.board = options.start.board.map((row) => [...row]) as unknown as Board;
       this.turn = options.start.turn;
       this.frames = [{ board: this.board, turn: this.turn, moves: 0, lastMove: null }];
+      this.settleIfOver();
       return;
     }
     // 开局先手由 World 掷骰决定；随机到伙伴执黑时，第一手就归它。
@@ -212,6 +216,7 @@ export class ReversiGame {
   }
 
   score(): { human: number; model: number } {
+    if (this.finalScore) return this.finalScore;
     const counts = discCount(this.board);
     return { human: counts[this.humanColor], model: counts[this.modelColor] };
   }
@@ -253,9 +258,9 @@ export class ReversiGame {
     this.lastMove = record.label;
     this.turn = side === 'human' ? 'model' : 'human';
 
-    // 自动停手：下一个该下的人没地方下就跳过；两边都没地方下就终局。
+    // 先看盘面本身是不是已经下完（下满，或某一方被清空）；没有的话才按「谁没地方下」停手。
     let passed: ReversiSide | null = null;
-    if (legalMoves(this.board, this.discOf(this.turn)).length === 0) {
+    if (!this.settleIfOver() && legalMoves(this.board, this.discOf(this.turn)).length === 0) {
       const other = this.turn === 'human' ? 'model' : 'human';
       if (legalMoves(this.board, this.discOf(other)).length === 0) {
         this.finish();
@@ -279,11 +284,36 @@ export class ReversiGame {
     };
   }
 
+  /**
+   * 盘面已经能判定的终局：下满（含全盘同色 64:0），或某一方已经被清空。
+   * 这两种情况都不用再等谁落子，直接结算。
+   */
+  private settleIfOver(): boolean {
+    if (this.phase !== 'playing') return true;
+    const counts = discCount(this.board);
+    if (emptyCount(this.board) > 0 && counts.B > 0 && counts.W > 0) return false;
+    this.finish();
+    return true;
+  }
+
   private finish(): void {
-    const score = this.score();
+    const counts = discCount(this.board);
+    const human = counts[this.humanColor];
+    const model = counts[this.modelColor];
+    // 一方被清盘（0 子）时按主流口径记 64:0 / 0:64：盘上没下完的空格算给幸存方。
+    this.finalScore = human === 0 || model === 0
+      ? human === 0
+        ? { human: 0, model: 64 }
+        : { human: 64, model: 0 }
+      : { human, model };
     this.phase = 'ended';
     this.endedAt = nowIso(this.timezone);
-    this.winner = score.human === score.model ? 'draw' : score.human > score.model ? 'human' : 'model';
+    this.winner =
+      this.finalScore.human === this.finalScore.model
+        ? 'draw'
+        : this.finalScore.human > this.finalScore.model
+          ? 'human'
+          : 'model';
   }
 
   private isEnded(): boolean {

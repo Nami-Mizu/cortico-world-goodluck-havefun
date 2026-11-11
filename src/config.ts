@@ -60,7 +60,7 @@ export const GOODLUCKHAVEFUN_CONFIG_GROUP: ConfigGroup = {
   owner: 'world:goodluckhavefun',
   schema: {
     type: 'object',
-    title: '好「机」友',
+    title: '闲弈',
     properties: {
       'worlds.goodluckhavefun.maxQuestions': {
         type: 'number',

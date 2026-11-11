@@ -10,7 +10,7 @@ export const VISION_KEY = 'GOODLUCKHAVEFUN_VISION_KEY';
 
 export const GOODLUCKHAVEFUN: WorldDefinition<GoodluckhavefunConfigSection> = {
   id: 'goodluckhavefun',
-  label: '好「机」友',
+  label: '闲弈',
   defaults: () => ({ ...GOODLUCKHAVEFUN_DEFAULTS }),
   create: (ctx) =>
     new GoodluckhavefunWorld({
